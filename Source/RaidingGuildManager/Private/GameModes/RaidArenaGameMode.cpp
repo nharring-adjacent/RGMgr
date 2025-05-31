@@ -12,6 +12,7 @@
 #include "GameFramework/PlayerStart.h" // If you were to use PlayerStarts for spawning
 #include "Kismet/GameplayStatics.h"   // For UGameplayStatics::GetAllActorsOfClass (alternative spawn point finding)
 #include "Engine/GameInstance.h"     // For GetGameInstance()
+#include "Engine/Engine.h"           // For GEngine
 
 ARaidArenaGameMode::ARaidArenaGameMode()
 {
@@ -68,6 +69,22 @@ void ARaidArenaGameMode::Tick(float DeltaTime)
 			}
 			UE_LOG(LogTemp, Verbose, TEXT("Current Raid Stamina: %f"), RaidPartyStaminaComponent->RaidPartyStamina.CurrentRaidStamina);
 		}
+	}
+
+	// On-screen debug messages
+	if (GEngine && RaidPartyStaminaComponent)
+	{
+		// Assuming RaidPartyStamina is a direct USTRUCT member in URaidPartyStaminaComponent
+		const FRaidPartyStamina& Stamina = RaidPartyStaminaComponent->RaidPartyStamina;
+		float Modifier = GetStaminaPerformanceModifier();
+
+		FString DebugMsg = FString::Printf(TEXT("Pull Stamina: %.1f / %.1f | Raid Stamina: %.1f / %.1f [Mod: %.2f] Combat: %s | Break: %s"),
+											 Stamina.CurrentPullStamina, Stamina.MaxPullStamina,
+											 Stamina.CurrentRaidStamina, Stamina.MaxRaidStamina,
+											 Modifier,
+											 bIsInCombat ? TEXT("TRUE") : TEXT("FALSE"),
+											 bIsInBreakPeriod ? TEXT("TRUE") : TEXT("FALSE"));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, DebugMsg);
 	}
 }
 
