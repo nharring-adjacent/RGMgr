@@ -7,6 +7,12 @@
 
 ARaiderCharacter::ARaiderCharacter()
 {
+	// Set default character class
+	CharacterClass = ECharacterClass::None;
+
+	// PersonalityStats will be initialized by its default constructor
+	// No explicit initialization needed here for PersonalityStats unless you want to override defaults
+
 	// Set specific defaults for RaiderCharacter if needed
 	// For example, different mesh, different base speed, etc.
 

@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Characters/RGMCharacterBase.h"
 #include "RaiderCharacter.generated.h"
+#include "Characters/CharacterTypes.h"
+#include "Characters/PersonalityStats.h"
 
 class ARaiderAIController; // Forward declaration
 
@@ -18,6 +20,12 @@ class RAIDINGGUILDMANAGER_API ARaiderCharacter : public ARGMCharacterBase
 
 public:
 	ARaiderCharacter();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Class")
+	ECharacterClass CharacterClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality Stats")
+	FPersonalityStats PersonalityStats;
 
 protected:
 	// Overrides from RGMCharacterBase
