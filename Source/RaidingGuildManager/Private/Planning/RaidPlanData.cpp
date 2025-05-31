@@ -4,20 +4,37 @@
 
 URaidPlanData::URaidPlanData()
 {
-	// Constructor logic if needed
+	// Initialize NamedPaths as an empty map
+	NamedPaths.Empty();
 }
 
-void URaidPlanData::AddPointToPath(const FRaidPlanPointData& PointData)
+void URaidPlanData::AddPointToPath(const FString& CharacterOrRoleID, const FRaidPlanPointData& PointData)
 {
-	CurrentPath.Points.Add(PointData);
+	FRaidPlanPath& Path = NamedPaths.FindOrAdd(CharacterOrRoleID);
+	Path.Points.Add(PointData);
 }
 
-void URaidPlanData::ClearPath()
+void URaidPlanData::ClearPathForCharacter(const FString& CharacterOrRoleID)
 {
-	CurrentPath.Points.Empty();
+	if (FRaidPlanPath* Path = NamedPaths.Find(CharacterOrRoleID))
+	{
+		Path->Points.Empty();
+	}
+	// Optionally, remove the key if the path is empty and that's desired behavior
+	// NamedPaths.Remove(CharacterOrRoleID);
 }
 
-const TArray<FRaidPlanPointData>& URaidPlanData::GetPathPoints() const
+void URaidPlanData::ClearAllPaths()
 {
-	return CurrentPath.Points;
+	NamedPaths.Empty();
+}
+
+const TArray<FRaidPlanPointData>* URaidPlanData::GetPathPointsForCharacter(const FString& CharacterOrRoleID) const
+{
+	return (const TArray<FRaidPlanPointData>*)(NamedPaths.Find(CharacterOrRoleID) ? &NamedPaths.Find(CharacterOrRoleID)->Points : nullptr);
+}
+
+const TMap<FString, FRaidPlanPath>& URaidPlanData::GetAllNamedPaths() const
+{
+	return NamedPaths;
 }
