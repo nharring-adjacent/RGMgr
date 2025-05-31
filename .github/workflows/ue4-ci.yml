@@ -1,0 +1,41 @@
+name: UE4 CI
+
+on:
+  push:
+    branches: [ "trunk" ]
+  pull_request:
+    branches: [ "trunk" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner,, }}/${{ github.event.repository.name,, }}/ue4-full:4.27.2-cudagl11.2.2-ubuntu18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for ue4-ci-helpers to determine the version string
+          clean: false # Required for ue4-ci-helpers
+
+      - name: Install ue4-ci-helpers
+        run: pip install ue4-ci-helpers
+
+      - name: Build project
+        run: python .github/scripts/build.py
+
+      - name: Run tests
+        run: python .github/scripts/run_tests.py
+
+      - name: Package project
+        run: python .github/scripts/package.py
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packaged-project
+          path: |
+            Build/Win64/
+            Build/Linux/
+            Build/Mac/
+          if-no-files-found: error # Fail the workflow if no files are found
