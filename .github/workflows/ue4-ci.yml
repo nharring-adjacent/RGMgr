@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: adamrehn/ue4-full:4.27.2-cudagl11.2.2-ubuntu18.04 # You might need to adjust the UE version and tags based on your project
+      image: ghcr.io/${{ github.repository_owner,, }}/${{ github.event.repository.name,, }}/ue4-full:4.27.2-cudagl11.2.2-ubuntu18.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
