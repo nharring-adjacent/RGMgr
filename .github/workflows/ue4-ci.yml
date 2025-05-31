@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Required for ue4-ci-helpers to determine the version string
+          clean: false # Required for ue4-ci-helpers
 
       - name: Install ue4-ci-helpers
         run: pip install ue4-ci-helpers
@@ -30,7 +31,7 @@ jobs:
         run: python .github/scripts/package.py
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: packaged-project
           path: |
