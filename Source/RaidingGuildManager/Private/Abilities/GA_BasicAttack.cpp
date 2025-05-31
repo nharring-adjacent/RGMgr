@@ -76,9 +76,30 @@ void UGA_BasicAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
 		// Modify the spec's modifier magnitude for health.
 		// This assumes the first modifier in GE_DamageBasic affects health.
 		// A more robust way is to use SetByCallerMagnitude with a specific tag.
+
+		float FinalDamageAmount = AttackDamageAmount;
+		if (TriggerEventData)
+		{
+			float StaminaModifier = TriggerEventData->EventMagnitude;
+			// Ensure modifier is not zero or negative if it's a multiplier
+			if (StaminaModifier > 0.0f)
+			{
+				FinalDamageAmount *= StaminaModifier;
+				UE_LOG(LogTemp, Log, TEXT("UGA_BasicAttack: Applying StaminaModifier %f. OriginalDamage: %f, FinalDamage: %f"), StaminaModifier, AttackDamageAmount, FinalDamageAmount);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("UGA_BasicAttack: Invalid StaminaModifier %f received. Using original damage."), StaminaModifier);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UGA_BasicAttack: TriggerEventData is null. Cannot apply StaminaModifier. Using original damage %f."), AttackDamageAmount);
+		}
+
 		if (DamageEffectSpecHandle.Data->Modifiers.IsValidIndex(0))
 		{
-			DamageEffectSpecHandle.Data->Modifiers[0].SetMagnitude(AttackDamageAmount); // Negative because it's damage
+			DamageEffectSpecHandle.Data->Modifiers[0].SetMagnitude(FinalDamageAmount); // Negative because it's damage
 		}
 		else
 		{

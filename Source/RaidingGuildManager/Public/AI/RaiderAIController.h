@@ -48,6 +48,7 @@ public:
 	// New Blackboard keys for path point actions
 	static const FName CurrentActionTagKeyName;
 	static const FName CurrentActionTargetKeyName;
+	static const FName StaminaModifierKeyName;
 
 
 	void SetPathToFollow(const TArray<FRaidPlanPointData>& PathPoints); // Updated parameter type

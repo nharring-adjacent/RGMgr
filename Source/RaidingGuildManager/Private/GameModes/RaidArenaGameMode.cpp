@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GameModes/RaidArenaGameMode.h"
+#include "Components/RaidPartyStaminaComponent.h"
 #include "Characters/RaiderCharacter.h"
 #include "Characters/BossCharacter.h"
 #include "Roster/RosterManager.h"
@@ -18,6 +19,133 @@ ARaidArenaGameMode::ARaidArenaGameMode()
 	DefaultPawnClass = nullptr;
 	// PlayerControllerClass = AYourPlayerController::StaticClass(); // Set if you have a custom one
 	// HUDClass = AYourHUD::StaticClass(); // Set if you have a custom HUD for this mode
+
+	RaidPartyStaminaComponent = CreateDefaultSubobject<URaidPartyStaminaComponent>(TEXT("RaidPartyStaminaComp"));
+	bIsInCombat = false;
+	OutOfCombatTimer = 0.0f;
+	bIsInBreakPeriod = false;
+}
+
+void ARaidArenaGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bIsInCombat)
+	{
+		if (RaidPartyStaminaComponent)
+		{
+			RaidPartyStaminaComponent->RaidPartyStamina.CurrentPullStamina -= 1.0f * DeltaTime;
+			if (RaidPartyStaminaComponent->RaidPartyStamina.CurrentPullStamina < 0.0f)
+			{
+				RaidPartyStaminaComponent->RaidPartyStamina.CurrentPullStamina = 0.0f;
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Current Pull Stamina: %f"), RaidPartyStaminaComponent->RaidPartyStamina.CurrentPullStamina);
+		}
+		OutOfCombatTimer = 0.0f; // Reset timer during combat
+	}
+	else // Not in combat
+	{
+		OutOfCombatTimer += DeltaTime;
+		if (OutOfCombatTimer > 30.0f && RaidPartyStaminaComponent)
+		{
+			if (RaidPartyStaminaComponent->RaidPartyStamina.CurrentPullStamina < RaidPartyStaminaComponent->RaidPartyStamina.MaxPullStamina)
+			{
+				RaidPartyStaminaComponent->RaidPartyStamina.CurrentPullStamina = RaidPartyStaminaComponent->RaidPartyStamina.MaxPullStamina;
+				UE_LOG(LogTemp, Log, TEXT("Pull Stamina Regenerated to Max: %f"), RaidPartyStaminaComponent->RaidPartyStamina.CurrentPullStamina);
+				OutOfCombatTimer = 0.0f; // Reset timer after regeneration to prevent continuous logging
+			}
+		}
+	}
+
+	if (bIsInBreakPeriod && RaidPartyStaminaComponent)
+	{
+		if (RaidPartyStaminaComponent->RaidPartyStamina.CurrentRaidStamina < RaidPartyStaminaComponent->RaidPartyStamina.MaxRaidStamina)
+		{
+			RaidPartyStaminaComponent->RaidPartyStamina.CurrentRaidStamina += 5.0f * DeltaTime;
+			if (RaidPartyStaminaComponent->RaidPartyStamina.CurrentRaidStamina > RaidPartyStaminaComponent->RaidPartyStamina.MaxRaidStamina)
+			{
+				RaidPartyStaminaComponent->RaidPartyStamina.CurrentRaidStamina = RaidPartyStaminaComponent->RaidPartyStamina.MaxRaidStamina;
+			}
+			UE_LOG(LogTemp, Verbose, TEXT("Current Raid Stamina: %f"), RaidPartyStaminaComponent->RaidPartyStamina.CurrentRaidStamina);
+		}
+	}
+}
+
+void ARaidArenaGameMode::StartCombat()
+{
+	bIsInCombat = true;
+	UE_LOG(LogTemp, Log, TEXT("Combat Started"));
+	// If a break period was active, it should end when combat starts.
+	if (bIsInBreakPeriod)
+	{
+		EndBreakPeriod();
+		UE_LOG(LogTemp, Log, TEXT("Break period ended due to combat starting."));
+	}
+}
+
+void ARaidArenaGameMode::EndCombat()
+{
+	bIsInCombat = false;
+	UE_LOG(LogTemp, Log, TEXT("Combat Ended"));
+}
+
+void ARaidArenaGameMode::StartBreakPeriod()
+{
+	if (bIsInCombat)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Cannot start break period while in combat!"));
+		return;
+	}
+	bIsInBreakPeriod = true;
+	UE_LOG(LogTemp, Log, TEXT("Break Period Started"));
+}
+
+void ARaidArenaGameMode::EndBreakPeriod()
+{
+	bIsInBreakPeriod = false;
+	UE_LOG(LogTemp, Log, TEXT("Break Period Ended"));
+}
+
+float ARaidArenaGameMode::GetStaminaPerformanceModifier() const
+{
+	if (!RaidPartyStaminaComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetStaminaPerformanceModifier: RaidPartyStaminaComponent is null. Returning default modifier 1.0f."));
+		return 1.0f;
+	}
+
+	// Accessing FRaidPartyStamina directly from the component
+	const FRaidPartyStamina& Stamina = RaidPartyStaminaComponent->RaidPartyStamina;
+
+	float Modifier = 1.0f;
+
+	// Check Pull Stamina
+	if (Stamina.MaxPullStamina > 0.0f) // Avoid division by zero
+	{
+		if ((Stamina.CurrentPullStamina / Stamina.MaxPullStamina) < 0.2f)
+		{
+			Modifier = 0.8f;
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetStaminaPerformanceModifier: MaxPullStamina is 0 or less. Pull stamina check skipped."));
+	}
+
+	// Check Raid Stamina
+	if (Stamina.MaxRaidStamina > 0.0f) // Avoid division by zero
+	{
+		if ((Stamina.CurrentRaidStamina / Stamina.MaxRaidStamina) < 0.1f)
+		{
+			Modifier = FMath::Min(Modifier, 0.7f); // Apply the harsher penalty
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetStaminaPerformanceModifier: MaxRaidStamina is 0 or less. Raid stamina check skipped."));
+	}
+
+	return Modifier;
 }
 
 void ARaidArenaGameMode::StartPlay()

@@ -22,6 +22,7 @@ const FName ARaiderAIController::VoiceCommandTargetKeyName = FName("VoiceCommand
 const FName ARaiderAIController::VoiceCommandLocationKeyName = FName("VoiceCommandLocation");
 const FName ARaiderAIController::CurrentActionTagKeyName = FName("CurrentActionTag");
 const FName ARaiderAIController::CurrentActionTargetKeyName = FName("CurrentActionTarget");
+const FName ARaiderAIController::StaminaModifierKeyName = FName("StaminaModifier");
 
 
 ARaiderAIController::ARaiderAIController()

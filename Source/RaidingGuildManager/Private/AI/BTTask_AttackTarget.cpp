@@ -65,7 +65,18 @@ EBTNodeResult::Type UBTTask_AttackTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 		return EBTNodeResult::Failed;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("BTTask_AttackTarget %s: Attempting to attack %s."), *OwnerComp.GetAIOwner()->GetNameSafe(OwnerComp.GetAIOwner()->GetPawn()), *GetNameSafe(TargetActor));
+	// Read Stamina Modifier from Blackboard
+	float StaminaModifier = 1.0f;
+	if (BlackboardComp->IsExist(ARaiderAIController::StaminaModifierKeyName))
+	{
+		StaminaModifier = BlackboardComp->GetValueAsFloat(ARaiderAIController::StaminaModifierKeyName);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BTTask_AttackTarget %s: StaminaModifierKeyName ('%s') not found on BB, defaulting to 1.0"), *OwnerComp.GetAIOwner()->GetNameSafe(OwnerComp.GetAIOwner()->GetPawn()), *ARaiderAIController::StaminaModifierKeyName.ToString());
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("BTTask_AttackTarget %s: Attempting to attack %s with StaminaModifier: %f."), *OwnerComp.GetAIOwner()->GetNameSafe(OwnerComp.GetAIOwner()->GetPawn()), *GetNameSafe(TargetActor), StaminaModifier);
 
 	IAbilitySystemInterface* TargetAbilitySystemInterface = Cast<IAbilitySystemInterface>(TargetActor);
 	if(!TargetAbilitySystemInterface)
@@ -100,6 +111,8 @@ EBTNodeResult::Type UBTTask_AttackTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 			// Trigger the ability with target data
 			FGameplayEventData Payload;
 			Payload.TargetData = TargetDataHandle;
+			Payload.EventMagnitude = StaminaModifier; // Pass stamina modifier in payload
+			UE_LOG(LogTemp, Log, TEXT("BTTask_AttackTarget: Passing StaminaModifier %f in payload to ability for %s."), StaminaModifier, *ControlledPawn->GetName());
 
 			ActivatedAbilityHandle = AbilitySpec->Handle;
 

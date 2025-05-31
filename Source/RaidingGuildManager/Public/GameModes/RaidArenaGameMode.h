@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Components/RaidPartyStaminaComponent.h"
 #include "RaidArenaGameMode.generated.h"
+
+class URaidPartyStaminaComponent;
 
 /**
  * ARaidArenaGameMode
@@ -28,7 +31,31 @@ protected:
 	virtual void StartPlay() override;
 	// virtual void HandleMatchHasStarted() override; // Alternative to StartPlay
 
+private:
+	bool bIsInCombat;
+	float OutOfCombatTimer;
+	bool bIsInBreakPeriod;
+
 public:
 	ARaidArenaGameMode();
 
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Game Flow")
+	void StartCombat();
+
+	UFUNCTION(BlueprintCallable, Category = "Game Flow")
+	void EndCombat();
+
+	UFUNCTION(BlueprintCallable, Category = "Game Flow")
+	void StartBreakPeriod();
+
+	UFUNCTION(BlueprintCallable, Category = "Game Flow")
+	void EndBreakPeriod();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Stamina")
+	float GetStaminaPerformanceModifier() const;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stamina")
+	URaidPartyStaminaComponent* RaidPartyStaminaComponent;
 };
