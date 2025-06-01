@@ -48,32 +48,32 @@ void URaidDiagramWidget::NativeConstruct()
 	// Ensure path is clear on widget setup
 	if (PlanData)
 	{
-		PlanData->ClearPath();
+		PlanData->ClearAllPaths(); // Changed from ClearPath to ClearAllPaths
 	}
 }
 
 
-void URaidDiagramWidget::StartNewPath(const FVector2D& InitialPoint, FGameplayTag Action, const FString& TargetID)
+void URaidDiagramWidget::StartNewPath(const FString& CharacterOrRoleID, const FVector2D& InitialPoint, FGameplayTag Action, const FString& TargetID)
 {
 	if (PlanData)
 	{
-		PlanData->ClearPath();
+		PlanData->ClearPathForCharacter(CharacterOrRoleID); // Use new function
 
 		FRaidPlanPointData PointData;
 		PointData.Location = InitialPoint;
 		PointData.ActionTag = Action;
 		PointData.TargetIdentifier = TargetID;
-		PlanData->AddPointToPath(PointData);
+		PlanData->AddPointToPath(CharacterOrRoleID, PointData); // Use new function
 
-		UE_LOG(LogTemp, Log, TEXT("RaidDiagramWidget: Started new path at X=%.2f, Y=%.2f. Action: %s, TargetID: %s"),
-			InitialPoint.X, InitialPoint.Y, *Action.ToString(), *TargetID);
+		UE_LOG(LogTemp, Log, TEXT("RaidDiagramWidget: Started new path for %s at X=%.2f, Y=%.2f. Action: %s, TargetID: %s"),
+			*CharacterOrRoleID, InitialPoint.X, InitialPoint.Y, *Action.ToString(), *TargetID);
 
 		// Request a repaint if drawing is handled in OnPaint
 		// MarkDirty(); // This forces a repaint, useful if your OnPaint depends on this data.
 	}
 }
 
-void URaidDiagramWidget::HandleMouseDown(const FVector2D& LocalPosition, FGameplayTag Action, const FString& TargetID)
+void URaidDiagramWidget::HandleMouseDown(const FString& CharacterOrRoleID, const FVector2D& LocalPosition, FGameplayTag Action, const FString& TargetID)
 {
 	if (PlanData)
 	{
@@ -81,10 +81,13 @@ void URaidDiagramWidget::HandleMouseDown(const FVector2D& LocalPosition, FGamepl
 		PointData.Location = LocalPosition;
 		PointData.ActionTag = Action;
 		PointData.TargetIdentifier = TargetID;
-		PlanData->AddPointToPath(PointData);
+		PlanData->AddPointToPath(CharacterOrRoleID, PointData); // Use new function
 
-		UE_LOG(LogTemp, Log, TEXT("RaidDiagramWidget: Added point to path at X=%.2f, Y=%.2f. Action: %s, TargetID: %s. Total points: %d"),
-			LocalPosition.X, LocalPosition.Y, *Action.ToString(), *TargetID, PlanData->GetPathPoints().Num());
+		const TArray<FRaidPlanPointData>* PathPointsPtr = PlanData->GetPathPointsForCharacter(CharacterOrRoleID);
+		int32 NumPoints = PathPointsPtr ? PathPointsPtr->Num() : 0;
+
+		UE_LOG(LogTemp, Log, TEXT("RaidDiagramWidget: Added point to path for %s at X=%.2f, Y=%.2f. Action: %s, TargetID: %s. Total points for this ID: %d"),
+			*CharacterOrRoleID, LocalPosition.X, LocalPosition.Y, *Action.ToString(), *TargetID, NumPoints);
 
 		// Request a repaint if drawing is handled in OnPaint
 		// MarkDirty();
@@ -95,13 +98,20 @@ void URaidDiagramWidget::FinalizePath()
 {
 	if (PlanData)
 	{
-		const TArray<FRaidPlanPointData>& PathPoints = PlanData->GetPathPoints();
-		UE_LOG(LogTemp, Log, TEXT("RaidDiagramWidget: Path finalized with %d points."), PathPoints.Num());
-		for (int32 i = 0; i < PathPoints.Num(); ++i)
+		const TMap<FString, FRaidPlanPath>& AllPaths = PlanData->GetAllNamedPaths();
+		UE_LOG(LogTemp, Log, TEXT("RaidDiagramWidget: Path finalized with %d named paths."), AllPaths.Num());
+
+		for (const auto& Pair : AllPaths)
 		{
-			const FRaidPlanPointData& Point = PathPoints[i];
-			UE_LOG(LogTemp, Log, TEXT("RaidDiagramWidget: Finalized Path Point %d: Location=%s, Action=%s, TargetID=%s"),
-				i, *Point.Location.ToString(), *Point.ActionTag.ToString(), *Point.TargetIdentifier);
+			const FString& CharacterOrRoleID = Pair.Key;
+			const FRaidPlanPath& Path = Pair.Value;
+			UE_LOG(LogTemp, Log, TEXT("RaidDiagramWidget: Path for %s has %d points."), *CharacterOrRoleID, Path.Points.Num());
+			for (int32 i = 0; i < Path.Points.Num(); ++i)
+			{
+				const FRaidPlanPointData& Point = Path.Points[i];
+				UE_LOG(LogTemp, Log, TEXT("  Point %d: Location=%s, Action=%s, TargetID=%s"),
+					i, *Point.Location.ToString(), *Point.ActionTag.ToString(), *Point.TargetIdentifier);
+			}
 		}
 
 		if (RosterManagerInstance)

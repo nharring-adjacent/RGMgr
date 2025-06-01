@@ -62,28 +62,44 @@ public:
 	URaidPlanData* PlanData;
 
 	/**
-	 * Call this when the user initiates a new path (e.g., first click).
-	 * Clears any existing path and adds the initial point with its associated action.
-	 * @param InitialPoint The 2D location of the first point.
+	 * Call this when the user initiates a new path for a specific character or role.
+	 * Clears any existing path for that character/role and adds the initial point.
+	 *
+	 * In UMG Blueprint:
+	 * - The CharacterOrRoleID should be determined by the UI. For example, the user might select a character
+	 *   from a dropdown list, or the UI might have a dedicated section for each character's plan.
+	 * - This ID (e.g., "TankCharacter_BP_0", "HealerRole", "DPS_Player1") is then passed to this function.
+	 * - The UMG Blueprint should manage a list of available/valid CharacterOrRoleIDs, potentially populated
+	 *   from game data (e.g., RosterManager or current party composition).
+	 *
+	 * @param CharacterOrRoleID Identifier for the character or role this path belongs to.
+	 * @param InitialPoint The 2D location of the first point (typically from mouse input).
 	 * @param Action The gameplay tag representing the action at this point (e.g., "Action.Move", "Action.Attack").
 	 * @param TargetID Optional identifier for the target of the action (e.g., "Boss", "Raider3").
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Raid Plan Input")
-	void StartNewPath(const FVector2D& InitialPoint, FGameplayTag Action, const FString& TargetID = TEXT(""));
+	void StartNewPath(const FString& CharacterOrRoleID, const FVector2D& InitialPoint, FGameplayTag Action, const FString& TargetID = TEXT(""));
 
 	/**
-	 * Call this to add a subsequent point to the current path.
-	 * This would be called from Blueprint's OnMouseButtonDown (for point-by-point)
-	 * or OnMouseMove (for continuous drawing - typically with a "Move" action).
-	 * @param LocalPosition The 2D location of the point.
+	 * Call this to add a subsequent point to the current path for a specific character or role.
+	 *
+	 * In UMG Blueprint:
+	 * - Similar to StartNewPath, the CharacterOrRoleID should be provided based on the current UI context
+	 *   (e.g., which character's path is actively being drawn).
+	 *
+	 * @param CharacterOrRoleID Identifier for the character or role this path belongs to.
+	 * @param LocalPosition The 2D location of the point (typically from mouse input).
 	 * @param Action The gameplay tag representing the action at this point.
 	 * @param TargetID Optional identifier for the target of the action.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Raid Plan Input")
-	void HandleMouseDown(const FVector2D& LocalPosition, FGameplayTag Action, const FString& TargetID = TEXT(""));
+	void HandleMouseDown(const FString& CharacterOrRoleID, const FVector2D& LocalPosition, FGameplayTag Action, const FString& TargetID = TEXT(""));
 
 	/**
 	 * Call this when the user indicates the path is complete (e.g., clicks a 'Finalize' button).
+	 * This finalizes the entire URaidPlanData object, which may now contain multiple paths
+	 * for different characters/roles. This PlanData object can then be retrieved using GetPlanData()
+	 * and passed, for example, to a RaidLeaderAIController to distribute the individual paths.
 	 * For MVP, this logs the path. Future: could broadcast an event.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Raid Plan Input")
