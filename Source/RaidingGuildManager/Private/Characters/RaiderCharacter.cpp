@@ -13,6 +13,8 @@
 #include "Materials/MaterialInterface.h" // Required for UMaterialInterface
 #include "TimerManager.h" // Required for FTimerManager and SetTimer
 #include "AI/UtilityAI/UtilityAIComponent.h" // Ensure UUtilityAIComponent is fully included for its members
+#include "Characters/BossCharacter.h"      // Added for GenerateThreatForTarget
+#include "Engine/DamageEvents.h"         // Added for DealDamageToTarget
 
 
 ARaiderCharacter::ARaiderCharacter()
@@ -213,4 +215,46 @@ void ARaiderCharacter::ClearDirective()
 
 	// Timer handle is automatically cleared by TimerManager when it executes a non-looping timer.
 	// ClearDirectiveTimerHandle.Invalidate(); // Not strictly necessary for non-looping, but good for clarity if re-used.
+}
+void ARaiderCharacter::DealDamageToTarget(ACharacter* TargetCharacter, float DamageAmount)
+{
+	if (!TargetCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: DealDamageToTarget - TargetCharacter is null."), *GetName());
+		return;
+	}
+
+	if (DamageAmount <= 0.f)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: DealDamageToTarget - DamageAmount is zero or negative (%.2f). No damage dealt to %s."), *GetName(), DamageAmount, *TargetCharacter->GetName());
+		return;
+	}
+
+	// Use a generic damage event for now. Can be more specific (FPointDamageEvent, FRadialDamageEvent) if needed.
+	FDamageEvent DamageEvent;
+	AController* MyController = GetController();
+
+	TargetCharacter->TakeDamage(DamageAmount, DamageEvent, MyController, this);
+
+	UE_LOG(LogTemp, Log, TEXT("%s dealt %.2f damage to %s."), *GetName(), DamageAmount, *TargetCharacter->GetName());
+}
+
+void ARaiderCharacter::GenerateThreatForTarget(ABossCharacter* TargetBoss, float ThreatAmount)
+{
+	if (!TargetBoss)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: GenerateThreatForTarget - TargetBoss is null."), *GetName());
+		return;
+	}
+
+	if (ThreatAmount <= 0.f)
+	{
+		UE_LOG(LogTemp, Log, TEXT("%s: GenerateThreatForTarget - ThreatAmount is zero or negative (%.2f). No threat generated for %s."), *GetName(), ThreatAmount, *TargetBoss->GetName());
+		return;
+	}
+
+	TargetBoss->ReceiveThreat(this, ThreatAmount);
+
+	UE_LOG(LogTemp, Log, TEXT("%s generated %.2f threat for %s."), *GetName(), ThreatAmount, *TargetBoss->GetName());
+
 }
