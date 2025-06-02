@@ -11,6 +11,7 @@
 
 class ARaiderAIController; // Forward declaration
 class UUtilityAIComponent; // Forward declaration for UtilityAIComponent
+class ABossCharacter;    // Forward declaration for BossCharacter
 
 /**
  *
@@ -32,10 +33,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality Stats")
 	FPersonalityStats PersonalityStats;
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	//~ Combat Functions
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void DealDamageToTarget(ACharacter* TargetCharacter, float DamageAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void GenerateThreatForTarget(ABossCharacter* TargetBoss, float ThreatAmount);
+	//~ End Combat Functions
+
 protected:
 	// Overrides from RGMCharacterBase
 	// virtual void InitializeAttributes() override;
 	// virtual void GiveDefaultAbilities() override;
-
-	virtual void Tick(float DeltaTime) override;
 };
