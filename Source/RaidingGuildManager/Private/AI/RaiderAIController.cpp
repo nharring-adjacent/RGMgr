@@ -66,22 +66,23 @@ void ARaiderAIController::OnPossess(APawn* InPawn)
 
 		if (BlackboardComponent && BehaviorTreeAsset && BehaviorTreeAsset->BlackboardAsset)
 		{
-			InitializeBlackboard(*BlackboardComponent, *BehaviorTreeAsset->BlackboardAsset);
-			BlackboardComponent->SetValueAsObject(SelfActorKeyName, Character);
-			// Initialize path keys to a default "no path" state
-			BlackboardComponent->SetValueAsBool(HasPathKeyName, false);
-			BlackboardComponent->SetValueAsInt(PathCurrentIndexKeyName, -1);
-			BlackboardComponent->SetValueAsBool(PathCompletedKeyName, true);
-			// Initialize voice command keys
-			BlackboardComponent->SetValueAsTag(VoiceCommandTagKeyName, FGameplayTag::EmptyTag);
-			BlackboardComponent->SetValueAsObject(VoiceCommandTargetKeyName, nullptr);
-			BlackboardComponent->SetValueAsVector(VoiceCommandLocationKeyName, FVector::ZeroVector);
-			// Initialize new action keys
-			BlackboardComponent->SetValueAsTag(CurrentActionTagKeyName, FGameplayTag::RequestGameplayTag(FName("Action.Move"))); // Default to move
-			BlackboardComponent->SetValueAsObject(CurrentActionTargetKeyName, nullptr);
+			// InitializeBlackboard(*BlackboardComponent, *BehaviorTreeAsset->BlackboardAsset);
+			// BlackboardComponent->SetValueAsObject(SelfActorKeyName, Character);
+			// // Initialize path keys to a default "no path" state
+			// BlackboardComponent->SetValueAsBool(HasPathKeyName, false);
+			// BlackboardComponent->SetValueAsInt(PathCurrentIndexKeyName, -1);
+			// BlackboardComponent->SetValueAsBool(PathCompletedKeyName, true);
+			// // Initialize voice command keys
+			// BlackboardComponent->SetValueAsTag(VoiceCommandTagKeyName, FGameplayTag::EmptyTag);
+			// BlackboardComponent->SetValueAsObject(VoiceCommandTargetKeyName, nullptr);
+			// BlackboardComponent->SetValueAsVector(VoiceCommandLocationKeyName, FVector::ZeroVector);
+			// // Initialize new action keys
+			// BlackboardComponent->SetValueAsTag(CurrentActionTagKeyName, FGameplayTag::RequestGameplayTag(FName("Action.Move"))); // Default to move
+			// BlackboardComponent->SetValueAsObject(CurrentActionTargetKeyName, nullptr);
 
-			RunBehaviorTree(BehaviorTreeAsset);
-			UE_LOG(LogTemp, Log, TEXT("RaiderAIController possessed %s and started behavior tree %s"), *InPawn->GetName(), *BehaviorTreeAsset->GetName());
+			// RunBehaviorTree(BehaviorTreeAsset);
+			// UE_LOG(LogTemp, Log, TEXT("RaiderAIController possessed %s and started behavior tree %s"), *InPawn->GetName(), *BehaviorTreeAsset->GetName());
+			UE_LOG(LogTemp, Log, TEXT("RaiderAIController possessed %s. Behavior Tree execution is DISABLED for UtilityAI."), *InPawn->GetName());
 		}
 		else
 		{
