@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Characters/RGMCharacterBase.h"
+#include "AI/UtilityAI/UtilityAIComponent.h" // Added for UtilityAIComponent
 #include "RaiderCharacter.generated.h"
 #include "Characters/CharacterTypes.h"
 #include "Characters/PersonalityStats.h"
 
 class ARaiderAIController; // Forward declaration
+class UUtilityAIComponent; // Forward declaration for UtilityAIComponent
 
 /**
  *
@@ -21,6 +23,9 @@ class RAIDINGGUILDMANAGER_API ARaiderCharacter : public ARGMCharacterBase
 public:
 	ARaiderCharacter();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	UUtilityAIComponent* UtilityAIComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Class")
 	ECharacterClass CharacterClass;
 
@@ -32,4 +37,5 @@ protected:
 	// virtual void InitializeAttributes() override;
 	// virtual void GiveDefaultAbilities() override;
 
+	virtual void Tick(float DeltaTime) override;
 };
