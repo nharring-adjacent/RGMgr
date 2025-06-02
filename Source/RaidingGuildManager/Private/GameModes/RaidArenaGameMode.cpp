@@ -7,6 +7,7 @@
 #include "Roster/RosterDataTypes.h" // For FRaiderInfoUIData
 #include "Planning/RaidPlanData.h" // For URaidPlanData
 #include "AI/RaiderAIController.h" // For ARaiderAIController cast
+#include "RGMPlayerController.h" // Added for the new Player Controller
 #include "Engine/World.h"
 #include "GameFramework/PlayerStart.h" // If you were to use PlayerStarts for spawning
 #include "Kismet/GameplayStatics.h"   // For UGameplayStatics::GetAllActorsOfClass (alternative spawn point finding)
@@ -16,7 +17,7 @@ ARaidArenaGameMode::ARaidArenaGameMode()
 {
 	// Set default pawn class to null, as we are spawning characters manually.
 	DefaultPawnClass = nullptr;
-	// PlayerControllerClass = AYourPlayerController::StaticClass(); // Set if you have a custom one
+	PlayerControllerClass = ARGMPlayerController::StaticClass(); // Set to use the new RGMPlayerController
 	// HUDClass = AYourHUD::StaticClass(); // Set if you have a custom HUD for this mode
 }
 

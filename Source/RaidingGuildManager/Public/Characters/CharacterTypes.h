@@ -12,3 +12,12 @@ enum class ECharacterClass : uint8
     Tank        UMETA(DisplayName = "Tank"),
     Healer      UMETA(DisplayName = "Healer")
 };
+
+UENUM(BlueprintType)
+enum class ETemporaryDirective : uint8
+{
+	None		UMETA(DisplayName = "None"),
+	Taunt		UMETA(DisplayName = "Taunt"),
+	Attack		UMETA(DisplayName = "Attack")
+	// Add more directives as needed, e.g., MoveTo, DefendTarget
+};
