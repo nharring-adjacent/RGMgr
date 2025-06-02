@@ -1,4 +1,4 @@
-name: UE4 CI
+name: UE5 CI
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/epicgames/unreal-engine:dev-4.27
+      image: ghcr.io/epicgames/unreal-engine:dev-5.3
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

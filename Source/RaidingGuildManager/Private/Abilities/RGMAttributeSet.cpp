@@ -6,12 +6,16 @@
 #include "Characters/RGMCharacterBase.h" // Required for HandleDeath
 
 URGMAttributeSet::URGMAttributeSet()
-	: Health(100.0f)
-	, MaxHealth(100.0f)
-	, Mana(100.0f)
-	, MaxMana(100.0f)
-	, bOutOfHealth(false)
+	: bOutOfHealth(false)
 {
+	Health.SetBaseValue(100.0f);
+	Health.SetCurrentValue(100.0f);
+	MaxHealth.SetBaseValue(100.0f);
+	MaxHealth.SetCurrentValue(100.0f);
+	Mana.SetBaseValue(100.0f);
+	Mana.SetCurrentValue(100.0f);
+	MaxMana.SetBaseValue(100.0f);
+	MaxMana.SetCurrentValue(100.0f);
 }
 
 void URGMAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)

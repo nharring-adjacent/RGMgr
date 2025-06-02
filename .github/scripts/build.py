@@ -1,4 +1,4 @@
-from ue4helpers import ProjectBuild
+from ue4helpers import ProjectPackager, VersionHelpers
 import os
 
 # Get the project root directory from an environment variable
@@ -7,12 +7,12 @@ if not project_root:
     raise Exception("GITHUB_WORKSPACE environment variable not set")
 
 # Create a ProjectBuild instance
-builder = ProjectBuild(project_root)
+builder = ProjectPackager(project_root, VersionHelpers.from_git_commit())
 
 # Build the project for Win64, Linux, and Mac
 # You may want to customize these platforms based on your needs
-builder.build("Win64", "Development")
-builder.build("Linux", "Development")
-builder.build("Mac", "Development")
+builder.package(args=["Development", "-platform=Win64"])
+builder.package(args=["Development", "-platform=Linux"])
+builder.package(args=["Development", "-platform=Mac"])
 
 print("Project build successful!")
